@@ -40,3 +40,12 @@ describe "About Pages" do
 		expect(page.title).to eq "Edde's Sample App | About US"
 	end
 end
+
+
+describe "Contact" do
+    it "should have h1 contact" do
+        visit 'static_pages/contact'
+
+        expect(page).to have_selector "h1", text: "Contact US"
+    end
+end
