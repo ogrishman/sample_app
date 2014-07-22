@@ -1,13 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe User, :type => :model do
-	before {@u = User.new(name: "Edde", email: "YangShuai@gmail.com")}
+	before do
+		@u = User.new(name: "Edde", email: "YangShuai@gmail.com", password: "fuck you")
+
+	end
+
 	subject {@u}
 
 	it {is_expected.to respond_to :name}
 	it {is_expected.to respond_to :email}
 	it {is_expected.to respond_to :password_digest}
 	it {is_expected.to be_valid}
+	it {is_expected.to respond_to :password}
+	it {is_expected.to respond_to :password_confirmation}
 
 	describe "when name is not present" do
 	    before {@u.name = " 	"}
@@ -25,6 +31,14 @@ RSpec.describe User, :type => :model do
 		before {@u.name = "a" * 51}
 
 		it {is_expected.not_to be_valid}
+	end
+
+	describe "contact page" do
+		it "should have correct title" do
+			visit "/contact"
+
+			expect(page.title).to eq "Edde's Sample App | Contact"
+		end
 	end
 
 	describe "when email address is not valid" do
@@ -55,8 +69,50 @@ RSpec.describe User, :type => :model do
 			a.save
 		end
 
-	    it "should be invalid when email address duplicates" do
-	        is_expected.not_to be_valid
-	    end
+		it {is_expected.not_to be_valid}
 	end
+
+	describe "when password is empty" do
+	    before {@u = User.new name: "YangShuai", email: "yangshuai@gmail.com",
+	                          password: "", password_confirmation: ""}
+
+        it {is_expected.not_to be_valid}
+	end
+
+	describe "when password is too short" do
+	    before {@u = User.new name: "YangShuai", email: "yangshuai@gmail.com",
+	                          password: "abcd", password_confirmation: "abcd"}
+
+        it {is_expected.not_to be_valid}
+	end
+
+	describe "when password is too long" do
+	    before {@u = User.new name: "YangShuai", email: "yangshuai@gmail.com",
+	                          password: "abcdffffff", password_confirmation: "abcdffffff"}
+
+        it {is_expected.not_to be_valid}
+	end
+
+	describe "when password is not match" do
+	    before {@u = User.new name: "YangShuai", email: "yangshuai@gmail.com",
+	                          password: "abcde", password_confirmation: "abcdef"}
+
+        it {is_expected.not_to be_valid}
+	end
+
+	context "authenticate method's return value" do
+		before do
+			@u = User.new name: "YangShuai", email: "yangshuai@gmail.com",
+	                          password: "abcdef", password_confirmation: "abcdef"
+	        @u.save
+	    end
+
+	    it "return true when password is correct" do
+	        u = User.find_by(email: "yangshuai@gmail.com")
+	        expect(u.authenticate("abcdef")).to be u
+	    end
+
+
+	end
+
 end
